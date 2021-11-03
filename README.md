@@ -8,7 +8,7 @@ This template use internal modules for each AWS resource. It allow flexible impl
 - Reuse existing VPC, Subnets, and Security Group
 - Create new Key-pairs and Solace instances
 
-Because of this modularity, there is no dependency from one module with another. Hence, when creating more than one resource, it is recommended to create one resource at a time as Terraform script provision resources concurrently when there is no dependencies.
+In order to reuse existing resource, set attribute `create = false ` for the object.
 
 ## Configuration
 1. Download this template
@@ -35,9 +35,19 @@ common_tags = {
    
    The following are the variables of AWS resources:
 ### VPC
+Example for creating a new VPC:
 ```
 vpc = {
   create = true
+  name = "solace"
+  cidr = "10.100.0.0/16"
+  add_cidrs = []
+}
+```
+Example for reusing existing VPC:
+```
+vpc = {
+  create = false
   name = "solace"
   cidr = "10.100.0.0/16"
   add_cidrs = []
@@ -216,6 +226,36 @@ terraform apply [--auto-approve]
 4. Decommission resources:
 ```
 terraform destroy [--auto-approve]
+```
+
+## Access to Solace VM
+Use your certificate to connect to your Solace VM:
+```
+ssh -i <your-private-key-file> sysadmin@solace-ip
+```
+
+## Required Step for Completing HA
+After provisioning Solace PubSub+ HA triplet, there is one manual step required from CLI:
+1. SSH to your primary node
+2. Open CLI:
+```
+solacectl cli
+```
+3. Assert leader on primary node:
+```
+solace> enable
+solace# admin
+solace(admin)# config-sync assert-leader router
+solace(admin)# end
+```
+4. Wait for about 30 seconds, then verify:
+```
+solace# show config-sync
+```
+The first two lines status should show:
+```
+Admin Status                      : Enabled
+Oper Status                       : Up
 ```
 
 ## Reference:

@@ -15,6 +15,9 @@ module "create-subnets" {
   region = var.region
   subnets = var.subnets.subnets
   common_tags = var.common_tags
+  depends_on = [
+    module.create-vpc
+  ]
 }
 
 module "create-securitygroup" {
@@ -25,6 +28,9 @@ module "create-securitygroup" {
   }
   solace_secgrp = var.solace_secgrp
   common_tags = var.common_tags
+  depends_on = [
+    module.create-vpc
+  ]
 }
 
 module "create-keypairs" {
@@ -53,4 +59,10 @@ module "create-solacebrokers" {
   admin_password = var.admin_password
   time_zone = var.time_zone
   ntp_server = var.ntp_server
+  depends_on = [
+    module.create-vpc,
+    module.create-subnets,
+    module.create-securitygroup,
+    module.create-keypairs,
+  ]
 }
