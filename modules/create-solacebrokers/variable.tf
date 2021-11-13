@@ -54,6 +54,7 @@ variable "solace_brokers" {
         subnet_ref = string
         private_ip = string
         public_ip = string
+        root_size = number
       })
       
       backup_node = object({
@@ -62,6 +63,7 @@ variable "solace_brokers" {
         subnet_ref = string
         private_ip = string
         public_ip = string
+        root_size = number
       })
       monitor_node = object({
         name = string
@@ -69,18 +71,19 @@ variable "solace_brokers" {
         subnet_ref = string
         private_ip = string
         public_ip = string
+        root_size = number
       })
       
-      storage = object({
+      storage = list(object({
+        volume_name = string
         type = string
         device_name = string
         size = number
-      })
+      }))
       
       solace_config = object({
         max_connection = number
         max_spool_mb = number
-        volume_name = string
       })
     }))
 }

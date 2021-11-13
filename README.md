@@ -57,23 +57,23 @@ vpc = {
 ```
 subnets = {
   create = true
-  subnets = {
-    solace-subnet-a = { 
+  subnets = [
+    { 
       name = "solace-subnet-a"
       cidr = "10.100.1.0/24"
       az_suffix = "a" #Availability Zone suffix
-    }
-    solace-subnet-b = { 
+    },
+    { 
       name = "solace-subnet-b"
       cidr = "10.100.2.0/24"
       az_suffix = "b"
-    }
-    solace-subnet-c = { 
+    },
+    { 
       name = "solace-subnet-c"
       cidr = "10.100.3.0/24"
       az_suffix = "c"
     }
-  }
+  ]
 }
 ```
 ### Security Groups
@@ -144,6 +144,7 @@ solace_brokers = {
         subnet_ref = "solace-subnet-a"
         private_ip = "10.100.1.11"
         public_ip = ""
+        root_size = 10
       }
       backup_node = {
         name = "pgsolace1b"
@@ -151,6 +152,7 @@ solace_brokers = {
         subnet_ref = "solace-subnet-b"
         private_ip = "10.100.2.11"
         public_ip = ""
+        root_size = 10
       }
       monitor_node = {
        name = "pgsolace1c"
@@ -158,16 +160,19 @@ solace_brokers = {
         subnet_ref = "solace-subnet-c"
         private_ip = "10.100.3.11"
         public_ip = ""
+        root_size = 30
       }
-      storage = {
-        type = "gp2"
-        device_name = "/dev/sdb"
-        size = 30
-      }
+      storage = [
+        {
+          volume_name = "nvme1n1"
+          type = "gp2"
+          device_name = "/dev/sdb"
+          size = 30
+        }
+      ]
       solace_config = {
         max_connection = 100
         max_spool_mb = 1000
-        volume_name = "nvme1n1"
       }
     }
     pgsolace2 = {
@@ -179,6 +184,7 @@ solace_brokers = {
         subnet_ref = "solace-subnet-b"
         private_ip = "10.100.2.21"
         public_ip = ""
+        root_size = 10
       }
       backup_node = {
         name = ""
@@ -186,6 +192,7 @@ solace_brokers = {
         subnet_ref = ""
         private_ip = ""
         public_ip = ""
+        root_size = 0
       }
       monitor_node = {
        name = ""
@@ -193,16 +200,19 @@ solace_brokers = {
         subnet_ref = ""
         private_ip = ""
         public_ip = ""
+        root_size = 0
       }
-      storage = {
-        type = "gp2"
-        device_name = "/dev/sdb"
-        size = 30
-      }
+      storage = [
+        {
+          volume_name = "nvme1n1"
+          type = "gp2"
+          device_name = "/dev/sdb"
+          size = 30
+        }
+      ]
       solace_config = {
         max_connection = 100
         max_spool_mb = 1000
-        volume_name = "nvme1n1"
       }
     }
   }

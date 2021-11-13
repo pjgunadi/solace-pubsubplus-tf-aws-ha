@@ -1,3 +1,12 @@
+locals {
+  subnets = {
+    for v in var.subnets.subnets : "${v.name}" => {
+      name = v.name
+      cidr = v.cidr
+      az_suffix = v.az_suffix
+    }
+  }
+}
 
 module "create-vpc" {
   source = "./modules/create-vpc"
@@ -13,7 +22,7 @@ module "create-subnets" {
     name = var.vpc.name
   }
   region = var.region
-  subnets = var.subnets.subnets
+  subnets = local.subnets
   common_tags = var.common_tags
   depends_on = [
     module.create-vpc
@@ -48,7 +57,7 @@ module "create-solacebrokers" {
     name = var.vpc.name
   }
 
-  subnets = var.subnets.subnets
+  subnets = local.subnets
   solace_keypair = var.solace_keypair.name
   solace_secgrp = var.solace_secgrp
   solace_brokers = var.solace_brokers.brokers

@@ -44,7 +44,7 @@ solace:
     redundancy_group_node_${monitor_host}_connectvia: ${monitor_ip}
     redundancy_group_node_${monitor_host}_nodetype: monitoring
 %{ endif ~}
-%{ if volume_name != "" ~}
+%{ if volume_name != "" && storage_count > 0 ~}
   storage:
     adb:
       device: ${volume_name}

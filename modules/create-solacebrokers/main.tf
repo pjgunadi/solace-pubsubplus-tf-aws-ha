@@ -1,6 +1,6 @@
 data "aws_ami" "solace_std" {
   most_recent      = true
-  owners = ["910732127950"]
+  owners = ["${var.ami_owner}"]
 
   filter {
     name   = "name"
@@ -55,7 +55,8 @@ data "template_file" "cloud_init_primary" {
     ntp_server = var.ntp_server
     max_connection = each.value.solace_config.max_connection
     max_spool_mb = each.value.solace_config.max_spool_mb
-    volume_name = each.value.solace_config.volume_name
+    storage_count = length(each.value.storage)
+    volume_name = length(each.value.storage) > 0 ? each.value.storage[0].volume_name : ""
     admin_user = var.admin_user
     admin_password = var.admin_password
     is_ha = each.value.ha
@@ -81,7 +82,8 @@ data "template_file" "cloud_init_backup" {
     ntp_server = var.ntp_server
     max_connection = each.value.solace_config.max_connection
     max_spool_mb = each.value.solace_config.max_spool_mb
-    volume_name = each.value.solace_config.volume_name
+    storage_count = length(each.value.storage)
+    volume_name = length(each.value.storage) > 0 ? each.value.storage[0].volume_name : ""
     admin_user = var.admin_user
     admin_password = var.admin_password
     is_ha = each.value.ha
@@ -129,6 +131,7 @@ locals {
       subnet_ref = v.primary_node.subnet_ref
       private_ip = v.primary_node.private_ip
       public_ip = v.primary_node.public_ip
+      root_size = v.primary_node.root_size
       storage = v.storage
     }
   }
@@ -139,6 +142,7 @@ locals {
       subnet_ref = v.backup_node.subnet_ref
       private_ip = v.backup_node.private_ip
       public_ip = v.backup_node.public_ip
+      root_size = v.backup_node.root_size
       storage = v.storage
     }
     if v.ha
@@ -150,31 +154,11 @@ locals {
       subnet_ref = v.monitor_node.subnet_ref
       private_ip = v.monitor_node.private_ip
       public_ip = v.monitor_node.public_ip
+      root_size = v.monitor_node.root_size
     }
     if v.ha
   }
 }
-
-# resource "aws_instance" "solace_primary" {
-#   for_each = var.solace_brokers
-#   ami = data.aws_ami.solace_std.id
-#   instance_type = each.value.primary_node.instance_type
-#   key_name = var.solace_keypair
-#   vpc_security_group_ids = [ data.aws_security_group.solace_secgrp.id ]
-#   subnet_id = data.aws_subnet.cluster_subnets[each.value.subnet_ref].id
-#   private_ip = each.value.primary_node.private_ip
-#   user_data = data.template_file.cloud_init[each.key].rendered
-
-#   ebs_block_device {
-#     device_name = each.value.storage.device_name
-#     volume_type = each.value.storage.type
-#     volume_size = each.value.storage.size
-#   }
-
-#   tags = merge({
-#     Name = each.value.primary_node.name
-#     }, var.common_tags)
-# }
 
 resource "aws_instance" "solace_primary" {
   for_each = local.solace_primary
@@ -186,10 +170,19 @@ resource "aws_instance" "solace_primary" {
   private_ip = each.value.private_ip
   user_data = data.template_file.cloud_init_primary[each.key].rendered
 
-  ebs_block_device {
-    device_name = each.value.storage.device_name
-    volume_type = each.value.storage.type
-    volume_size = each.value.storage.size
+  root_block_device {
+    volume_size = each.value.root_size
+    tags = var.common_tags
+  }
+
+  dynamic "ebs_block_device" {
+    for_each = each.value.storage
+    content {
+      device_name = ebs_block_device.value.device_name
+      volume_type = ebs_block_device.value.type
+      volume_size = ebs_block_device.value.size
+      tags = var.common_tags
+    }
   }
 
   tags = merge({
@@ -207,10 +200,19 @@ resource "aws_instance" "solace_backup" {
   private_ip = each.value.private_ip
   user_data = data.template_file.cloud_init_backup[each.key].rendered
 
-  ebs_block_device {
-    device_name = each.value.storage.device_name
-    volume_type = each.value.storage.type
-    volume_size = each.value.storage.size
+  root_block_device {
+    volume_size = each.value.root_size
+    tags = var.common_tags
+  }
+
+  dynamic "ebs_block_device" {
+    for_each = each.value.storage
+    content {
+      device_name = ebs_block_device.value.device_name
+      volume_type = ebs_block_device.value.type
+      volume_size = ebs_block_device.value.size
+      tags = var.common_tags
+    }
   }
 
   tags = merge({
@@ -228,6 +230,11 @@ resource "aws_instance" "solace_monitor" {
   private_ip = each.value.private_ip
   user_data = data.template_file.cloud_init_monitor[each.key].rendered
 
+  root_block_device {
+    volume_size = each.value.root_size
+    tags = var.common_tags
+  }
+  
   tags = merge({
     Name = each.value.name
     }, var.common_tags)
