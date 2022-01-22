@@ -89,6 +89,8 @@ solace_brokers = {
         private_ip = "10.100.1.11"
         public_ip = ""
         root_size = 10
+        hostname = "pgsolace1a"
+        fqdn = "pgsolace1a"
       }
       backup_node = {
         name = "pgsolace1b"
@@ -97,6 +99,8 @@ solace_brokers = {
         private_ip = "10.100.2.11"
         public_ip = ""
         root_size = 10
+        hostname = "pgsolace1b"
+        fqdn = "pgsolace1b"
       }
       monitor_node = {
        name = "pgsolace1c"
@@ -104,13 +108,21 @@ solace_brokers = {
         subnet_ref = "solace-subnet-c"
         private_ip = "10.100.3.11"
         public_ip = ""
-        root_size = 30
+        root_size = 10
+        hostname = "pgsolace1c"
+        fqdn = "pgsolace1c"
       }
       storage = [{
         volume_name = "nvme1n1"
         type = "gp2"
         device_name = "/dev/sdb"
         size = 30
+      }]
+      monitor_storage = [{
+        volume_name = "nvme1n1"
+        type = "gp2"
+        device_name = "/dev/sdb"
+        size = 10
       }]
       solace_config = {
         max_connection = 100
@@ -134,7 +146,7 @@ solace_brokers = {
         subnet_ref = ""
         private_ip = ""
         public_ip = ""
-        root_size = 10
+        root_size = 0
       }
       monitor_node = {
        name = ""
@@ -142,7 +154,7 @@ solace_brokers = {
         subnet_ref = ""
         private_ip = ""
         public_ip = ""
-        root_size = 30
+        root_size = 0
       }
       storage = [{
         volume_name = "nvme1n1"
@@ -150,6 +162,7 @@ solace_brokers = {
         device_name = "/dev/sdb"
         size = 30
       }]
+      monitor_storage = []
       solace_config = {
         max_connection = 100
         max_spool_mb = 1000
@@ -163,4 +176,4 @@ solace_edition="standard"
 admin_user="admin"
 admin_password="yourpassword"
 time_zone="Asia/Singapore"
-ntp_server="pool.ntp.org"
+ntp_server=""

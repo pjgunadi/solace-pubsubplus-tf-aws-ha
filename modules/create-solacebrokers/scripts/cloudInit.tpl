@@ -1,4 +1,11 @@
 #cloud-config
+%{ if hostname != "" ~}
+hostname: ${hostname}
+%{ endif ~}
+%{ if fqdn != "" ~}
+fqdn: ${fqdn}
+manage_etc_hosts: true
+%{ endif ~}
 %{ if time_zone != "" ~}
 timezone: ${time_zone}
 %{ endif ~}

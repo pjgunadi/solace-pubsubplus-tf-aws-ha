@@ -74,6 +74,8 @@ variable "solace_brokers" {
         private_ip = string
         public_ip = string
         root_size = number
+        hostname = string
+        fqdn = string
       })
       
       backup_node = object({
@@ -83,6 +85,8 @@ variable "solace_brokers" {
         private_ip = string
         public_ip = string
         root_size = number
+        hostname = string
+        fqdn = string
       })
       monitor_node = object({
         name = string
@@ -91,9 +95,18 @@ variable "solace_brokers" {
         private_ip = string
         public_ip = string
         root_size = number
+        hostname = string
+        fqdn = string
       })
       
       storage = list(object({
+        volume_name = string
+        type = string
+        device_name = string
+        size = number
+      }))
+
+      monitor_storage = list(object({
         volume_name = string
         type = string
         device_name = string

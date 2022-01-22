@@ -1,4 +1,11 @@
 #cloud-config
+%{ if hostname != "" ~}
+hostname: ${hostname}
+%{ endif ~}
+%{ if fqdn != "" ~}
+fqdn: ${fqdn}
+manage_etc_hosts: true
+%{ endif ~}
 %{ if time_zone != "" ~}
 timezone: ${time_zone}
 %{ endif ~}
@@ -37,4 +44,19 @@ solace:
     redundancy_group_node_${backup_host}_nodetype: message_routing
     redundancy_group_node_${monitor_host}_connectvia: ${monitor_ip}
     redundancy_group_node_${monitor_host}_nodetype: monitoring
+%{ endif ~}
+%{ if volume_name != "" && storage_count > 0 ~}
+  storage:
+    adb:
+      device: ${volume_name}
+    internalSpool:
+      device: ${volume_name}
+    adbBackup:
+      device: ${volume_name}
+    diagnostics:
+      device: ${volume_name}
+    jail:
+      device: ${volume_name}
+    var:
+      device: ${volume_name}
 %{ endif ~}

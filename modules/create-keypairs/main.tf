@@ -2,11 +2,11 @@ resource "tls_private_key" "ssh" {
   algorithm = "RSA"
 
   provisioner "local-exec" {
-    command = "cat > ${var.solace_keypair} <<EOL\n${tls_private_key.ssh.private_key_pem}\nEOL"
+    command = "cat > ${var.solace_keypair}.crt <<EOL\n${tls_private_key.ssh.private_key_pem}\nEOL"
   }
 
   provisioner "local-exec" {
-    command = "chmod 600 ${var.solace_keypair}"
+    command = "chmod 600 ${var.solace_keypair}.crt"
   }
 }
 

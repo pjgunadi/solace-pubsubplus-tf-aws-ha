@@ -127,7 +127,7 @@ solace_version="9.11.0.10"
 admin_user="admin"
 admin_password="yourpassword"
 time_zone="Asia/Singapore"
-ntp_server="pool.ntp.org"
+ntp_server=""
 ```
 - Solace brokers configuration:
 This sample has two sets of brokers: 1) HA setup, 2) Standalone:
@@ -160,7 +160,7 @@ solace_brokers = {
         subnet_ref = "solace-subnet-c"
         private_ip = "10.100.3.11"
         public_ip = ""
-        root_size = 30
+        root_size = 10
       }
       storage = [
         {
@@ -168,6 +168,14 @@ solace_brokers = {
           type = "gp2"
           device_name = "/dev/sdb"
           size = 30
+        }
+      ]
+      monitor_storage = [
+        {
+          volume_name = "nvme1n1"
+          type = "gp2"
+          device_name = "/dev/sdb"
+          size = 10
         }
       ]
       solace_config = {
@@ -210,6 +218,7 @@ solace_brokers = {
           size = 30
         }
       ]
+      monitor_storage = []
       solace_config = {
         max_connection = 100
         max_spool_mb = 1000

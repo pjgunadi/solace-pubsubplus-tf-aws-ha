@@ -51,6 +51,8 @@ data "template_file" "cloud_init_primary" {
   template = file("${path.module}/scripts/cloudInit.tpl")
 
   vars = {
+    hostname = each.value.primary_node.hostname
+    fqdn = each.value.primary_node.fqdn
     time_zone = var.time_zone
     ntp_server = var.ntp_server
     max_connection = each.value.solace_config.max_connection
@@ -78,6 +80,8 @@ data "template_file" "cloud_init_backup" {
   template = file("${path.module}/scripts/cloudInit.tpl")
 
   vars = {
+    hostname = each.value.backup_node.hostname
+    fqdn = each.value.backup_node.fqdn
     time_zone = var.time_zone
     ntp_server = var.ntp_server
     max_connection = each.value.solace_config.max_connection
@@ -105,8 +109,12 @@ data "template_file" "cloud_init_monitor" {
   template = file("${path.module}/scripts/cloudInit_monitor.tpl")
 
   vars = {
+    hostname = each.value.monitor_node.hostname
+    fqdn = each.value.monitor_node.fqdn
     time_zone = var.time_zone
     ntp_server = var.ntp_server
+    storage_count = length(each.value.monitor_storage)
+    volume_name = length(each.value.monitor_storage) > 0 ? each.value.monitor_storage[0].volume_name : ""
     admin_user = var.admin_user
     admin_password = var.admin_password
     is_ha = each.value.ha
@@ -155,6 +163,7 @@ locals {
       private_ip = v.monitor_node.private_ip
       public_ip = v.monitor_node.public_ip
       root_size = v.monitor_node.root_size
+      storage = v.monitor_storage
     }
     if v.ha
   }
@@ -233,6 +242,16 @@ resource "aws_instance" "solace_monitor" {
   root_block_device {
     volume_size = each.value.root_size
     tags = var.common_tags
+  }
+
+  dynamic "ebs_block_device" {
+    for_each = each.value.storage
+    content {
+      device_name = ebs_block_device.value.device_name
+      volume_type = ebs_block_device.value.type
+      volume_size = ebs_block_device.value.size
+      tags = var.common_tags
+    }
   }
   
   tags = merge({
